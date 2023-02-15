@@ -13,7 +13,7 @@ const app = express();
 //en la que se realizen las peticiones
 app.use(cors());
 
-//lectura y parseo del body
+//lectura y parseo del bodykk
 app.use(express.json());
 
 //Conexion a base de datos
