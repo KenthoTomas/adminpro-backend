@@ -9,22 +9,22 @@ const { conexionDb } = require('./database/config');
 
 const app = express();
 
-//configurar CORS
-app.use(cors())
+//configurar CORS:nos permite compativilidad entre diferentes regiones 
+//en la que se realizen las peticiones
+app.use(cors());
+
+//lectura y parseo del body
+app.use(express.json());
 
 //Conexion a base de datos
 conexionDb();
 //console.log(process.env)
 
 //Rutas
+app.use('/api/usuarios',require('./routes/usuarios.route'));
+app.use('/api/login',require('./routes/auth.js'))
 
-app.get('/',(req,res)=>{
-    res.json({
-        ok:true,
-        msj:'Hola mundo'
-    })
-});
 
 app.listen(process.env.PORT,()=>{
     console.log(`Servidor corriendo en puerto ${3000}`)
-})
+});
