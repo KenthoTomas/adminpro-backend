@@ -6,13 +6,30 @@ const { generarJWT } = require("../helpers/jwt");
 
 const Usuario = require('../models/usuario.model');
 
+
+
 const getUsuarios = async(req,res)=>{
 
-    const  usuarios = await Usuario.find({},'nombre email role google');
+    const desde = Number(req.query.desde) || 0;
+    // const  usuarios = await Usuario.find({},'nombre email role google')
+    //                                .skip(desde)
+    //                                .limit(5);
+
+    // const total = await Usuario.count();
+
+const [usuarios,total] =  await Promise.all([
+        Usuario.find({},'nombre email role google img')
+                                   .skip(desde)
+                                   .limit(5),
+
+                                   Usuario.countDocuments()
+    ]);
+
     res.json({
         ok:true,
         usuarios:usuarios,
-        uid:req.uid
+        uid:req.uid,
+        total:total
     })
 }
 
@@ -34,24 +51,19 @@ const postUsuarios = async (req,res = response)=>{
         }
 
 
-        const usuario = new Usuario(req.body);
-        //encriptar contraseña
-        const salt = bcrypt.genSaltSync();
-        usuario.password = bcrypt.hashSync(password,salt)
-        //guardar usuario
-        await usuario.save();
-
-          //generar JWT
-
-          const token = await generarJWT(usuario.id);
-
-
+const usuario = new Usuario(req.body);
+//encriptar contraseña
+const salt = bcrypt.genSaltSync();
+usuario.password = bcrypt.hashSync(password,salt)
+//guardar usuario
+await usuario.save();
+//generar JWT
+const token = await generarJWT(usuario.id);
     res.json({
         ok:true,
         usuario:usuario,
         token:token
-    })
-        
+    }) 
     } catch (error) {
         console.log(error);
         res.status(500).json({

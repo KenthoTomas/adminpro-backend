@@ -22,8 +22,11 @@ conexionDb();
 
 //Rutas
 app.use('/api/usuarios',require('./routes/usuarios.route'));
-app.use('/api/login',require('./routes/auth.js'))
-
+app.use('/api/login',require('./routes/auth.js'));
+app.use('/api/hospitales',require('./routes/hospitales.route.js'));
+app.use('/api/medicos',require('./routes/medicos.route.js'));
+app.use('/api/todo',require('./routes/busqueda.route.js'));
+app.use('/api/uploads',require('./routes/uploads.route.js'));
 
 app.listen(process.env.PORT,()=>{
     console.log(`Servidor corriendo en puerto ${3000}`)
