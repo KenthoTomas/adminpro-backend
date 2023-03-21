@@ -13,6 +13,9 @@ const app = express();
 //en la que se realizen las peticiones
 app.use(cors());
 
+//carpeta publica
+app.use(express.static('public'));
+
 //lectura y parseo del bodykk
 app.use(express.json());
 

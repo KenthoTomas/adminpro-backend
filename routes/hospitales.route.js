@@ -27,12 +27,15 @@ postHospitales
 );
 
 router.put('/:id',[
-    
+    validarJWT,
+    check('nombre','El nombre del hospital es nesesario').not().isEmpty(),
+    validarCampos
+
 ],putHospitales);
 
 
 router.delete('/:id',[
-
+    validarJWT
 ],
 
 deleteHospitales);

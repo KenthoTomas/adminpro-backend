@@ -40,17 +40,74 @@ const postHospitales =  async(req, res = response)=>{
     }
 
 }
-const putHospitales = (req, res = response)=>{
-    res.json({
-        ok:true,
-        mjs:'putHospitales'
-    })
+const putHospitales = async (req, res = response)=>{
+
+    const id = req.params.id;
+    const uidUsuario = req.uid;
+    try {
+
+        const hospital = await Hospital.findById(id);
+        if (!hospital){
+            return res.status(404).json({
+                ok:false,
+                msj:'No se encontro el usuario'
+            })
+        }
+
+        hospital.nombre = req.body.nombre;
+        const cambiosHospital = {
+            ...req.body,
+            usuario:uidUsuario
+
+        }
+        const hospitalActualizado = await Hospital.findByIdAndUpdate(id,cambiosHospital, {new:true})
+
+        res.json({
+            ok:true,
+            mjs:'putHospitales',
+            hospitalActualizado
+        })
+        
+    } catch (error) {
+        console.log(error)
+        res.status.json({
+            ok:false,
+            msj: 'hable con el administrador'
+        })
+    }
+    
 }
-const deleteHospitales = (req, res = response)=>{
-    res.json({
-        ok:true,
-        mjs:'deleteHospitales'
-    })
+const deleteHospitales = async(req, res = response)=>{
+
+    const id = req.params.id;
+
+    try {
+
+        const hospital = await Hospital.findById(id);
+        if (!hospital){
+            return res.status(404).json({
+                ok:false,
+                msj:'No se encontro el usuario'
+            })
+        }
+
+        await Hospital.findByIdAndDelete(id)
+
+        res.json({
+            ok:true,
+            mjs:'Hospital eliminado',
+            
+        })
+        
+    } catch (error) {
+        console.log(error)
+        res.status.json({
+            ok:false,
+            msj: 'hable con el administrador'
+        })
+    }
+
+
 }
 
 module.exports = {

@@ -28,12 +28,15 @@ postMedicos
 );
 
 router.put('/:id',[
-    
+    validarJWT,
+    check('nombre','El nombre del medico es nesesario').not().isEmpty(),
+    check('Hospital','El id del hospital es nesesario y valid').isMongoId(),
+
 ],putMedicos);
 
 
 router.delete('/:id',[
-
+    validarJWT
 ],
 
 deleteMedicos);
