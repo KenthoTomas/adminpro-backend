@@ -1,11 +1,12 @@
 const {response} = require('express');
 const bcrypt = require('bcryptjs');
 const { generarJWT } = require("../helpers/jwt");
+const { validarJWT,uidUsuarioLogeado} =require('../middlewares/validar-jwt')
  
 
 
 const Usuario = require('../models/usuario.model');
-
+var usuarioUid = uidUsuarioLogeado
 
 
 const getUsuarios = async(req,res)=>{
@@ -78,7 +79,7 @@ const token = await generarJWT(usuario.id);
 
 const putUsuarios = async(req,res=response)=>{
     const uid = req.params.id;
-   
+   //TODO: Validar token y comprobar si es el usuario correcto
     try {
 
 
@@ -103,6 +104,14 @@ const putUsuarios = async(req,res=response)=>{
                     msj:'ya existe un usuario con ese email'
                 })
             }
+        }
+        if(!usuarioDB.google){
+            campos.email = email;
+        }else if(usuarioDB.email !== email){
+            return res.status(400).json({
+                ok:false,
+                msj:'Usuarios de Google no pueden cambiar correo'
+            })
         }
        campos.email= email;
         const usuarioActualizado = await Usuario.findByIdAndUpdate(uid,campos,{new:true});
@@ -136,7 +145,14 @@ const deleteUsuarios = async(req,res=response)=>{
                 msj:'no existe un usuario con ese id'
             })
         }
-        
+        console.log(uidUsuarioLogeado+" :UID");
+        if(usuarioDB===uidUsuario.req.uid){
+            return res.status(404).json({
+                ok:false,
+                msj:'No puede eliminarse al usuario logeado'
+            })
+            
+        }
         const eliminarUsuario = await Usuario.findByIdAndDelete(uid);
 
         res.json({

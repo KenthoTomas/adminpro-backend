@@ -2,21 +2,22 @@ const { response } = require("express");
 const Usuario = require('../models/usuario.model');
 const bcrypt = require('bcryptjs');
 const { generarJWT } = require("../helpers/jwt");
+const { googleVerify } = require("../helpers/google.verify");
 
 
 const login = async(req,res=response) =>{
 
     const { email,password} = req.body;
-
+    var uidUsuario='';
 
     try {
 
         //verificar email
         const usuarioDB = await Usuario.findOne({email});
          if (!usuarioDB){
-            return res.status(404).json({
+            return res.status(400).json({
                 ok:false,
-                mjs: 'email no encotrado'
+                mjs:'email no encotrado'
             })
          }
 
@@ -38,8 +39,11 @@ const login = async(req,res=response) =>{
         res.json({
             ok:true,
             mjs:'Conexion exitosa',
-            token:token
+            token:token,
+            usuarioDB
         })
+        uidUsuario=usuarioDB._id;
+        console.log(uidUsuario+": uid de usuario autenticado")
         
     } catch (error) {
         console.log(error);
@@ -53,20 +57,63 @@ const login = async(req,res=response) =>{
 }
 
 const googleSignIn = async(req,res=response) =>{
-    res.status(400).json({
-        ok:true,
-        mjs:req.body.token
-    });
+
+    try {
+        const {email,name,picture} = await googleVerify(req.body.token);
+
+        const usuarioDB = await Usuario.findOne({email});
+        let usuario;
+
+        if(!usuarioDB){
+            usuario= new Usuario({
+                nombre:name,
+                email:email,
+                password:'@@@',
+                img:picture,
+                google:true
+
+            })
+        }else{
+            usuario = usuarioDB;
+            usuario.google= true;
+
+        }
+        //guardar usuario
+        await usuario.save();
+        //JWT
+        
+        const token = await generarJWT(usuario.id);
+
+
+        res.status(200).json({
+            ok:true,
+            email,name,picture,token
+        })
+    }
+    
+    catch (error) {
+        console.log(error);
+        res.status(400).json({
+            ok:true,
+            mjs:'Token no es correcto'
+        });
+    }
+    
 }
 
 const renewToken = async (req,res=response)=>{
 
     const uid = req.uid;
+    
     const token = await generarJWT(uid);
+
+    const usuarioDB = await Usuario.findById(uid);
+    
 
     res.json({
         ok:true,
-        token
+        token,
+        usuarioDB
     })
 }
 

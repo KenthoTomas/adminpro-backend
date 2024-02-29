@@ -1,5 +1,6 @@
 const jwt  = require("jsonwebtoken");
 
+var uidUsuarioLogeado="";
 const validarJWT = (req,res,next) =>{
 
     //Leer el token
@@ -15,9 +16,11 @@ const validarJWT = (req,res,next) =>{
     }
     try {
         const {uid} = jwt.verify(token , process.env.JWT_SECRET);
-        console.log(uid);
-        req.uid = uid;
         
+       
+        req.uid = uid;
+        uidUsuarioLogeado=req.uid;
+        console.log(uidUsuarioLogeado+"uid en validar-jwt")
     } catch (error) {
         console.log(error);
         return res.status(401).json({
@@ -29,5 +32,6 @@ const validarJWT = (req,res,next) =>{
 }
 
 module.exports={
-    validarJWT
+    validarJWT,
+    uidUsuarioLogeado
 }
